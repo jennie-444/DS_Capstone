@@ -12,4 +12,7 @@ Ourchosen dataset is published by Hugging Face and authored by Falah.G.Salieh. T
 #### Structure
 There are just 2 columns in the dataset consisting of the image and the label associated to the image describing the severity of the disease.The image pixel array representations can be extracted. The labels for the images include non demented, moderate demented, mild demented, and very mild demented. The dataset is split into train and test sets. The training data size is 22,560,791.2 bytes and 5120 samples. The test data size if 5,637,447.08 bytes and 1280 samples. 
 
-#### Image Transformations
+#### Image Preprocessing
+In the `data_preprocess.ipynb` we have conducted various preprocessing steps for our dataset. Such preprocessing steps include normalization techniques such as min/max scaling, z-score standardization, and local contrast normalization. We also preformed image cropping to remove unneeded parts of the image. Lastly we performed noise reduction using methods such as gaussian blur, median blur, and bilateral filter. 
+
+
