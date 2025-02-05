@@ -7,6 +7,8 @@ from datasets import load_dataset
 from timm.models.vision_transformer import VisionTransformer
 import numpy as np
 import cv2
+import pandas as pd
+from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, accuracy_score
 
 # load data
 def dict_to_image(image_dict):
@@ -27,7 +29,7 @@ dataset_test = dataset_test.to_pandas()
 dataset_test['img_arr'] = dataset_test['image'].apply(dict_to_image)
 dataset_test.drop("image", axis=1, inplace=True)
 
-# Dataset class
+# dataset class
 class MRIDataset(Dataset):
     def __init__(self, dataframe):
         self.dataframe = dataframe
@@ -42,14 +44,13 @@ class MRIDataset(Dataset):
         label_tensor = torch.tensor(label, dtype=torch.long)
         return img_tensor, label_tensor
 
-# Hyperparameters
+# hyperparameters
 IMAGE_SIZE = 128
 PATCH_SIZE = 8
 NUM_CLASSES = 4
 BATCH_SIZE = 32
-EPOCHS = 10
+EPOCHS = 15
 LEARNING_RATE = 1e-4
-NUM_SAMPLES = 1000
 
 # datasets
 train_dataset = MRIDataset(dataset_train)
@@ -64,22 +65,24 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=True)
 #     transforms.Normalize(mean=[0], std=[1])
 # ])
 
-# Vision Transformer model
+# vision transformer model
 model = VisionTransformer(
-    img_size=IMAGE_SIZE,
-    patch_size=PATCH_SIZE,
-    embed_dim=768,
-    depth=12,
-    num_heads=12,
-    mlp_ratio=4.0,
+    img_size=128,    
+    patch_size=16,   
+    embed_dim=384,  
+    depth=8,         
+    num_heads=6,   
+    mlp_ratio=3.0,   
+    dropout=0.1,    
+    in_chans=1,      
     num_classes=NUM_CLASSES
 )
 
-# Define loss and optimizer
+# define loss and optimizer
 criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE)
+optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 
-# Training loop
+# training loop
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
 
@@ -99,25 +102,55 @@ for epoch in range(EPOCHS):
 
     print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {running_loss/len(train_loader):.4f}")
 
-# Save the trained model
-torch.save(model.state_dict(), "C:/Users/jenni/virtualEnv/DS Capstone/DS_Capstone/model_results/vision_transformer_model.pth")
+# save the trained model
+torch.save(model.state_dict(), "C:/Users/jenni/virtualEnv/DS Capstone/DS_Capstone/model_results/vision_transformer_model_basic.pth")
 
 # evaluation
 def evaluate_model(model, test_loader, device):
     model.eval()
-    correct = 0
-    total = 0
+    all_labels = []
+    all_preds = []
 
-    with torch.no_grad():  
+    with torch.no_grad():
         for images, labels in test_loader:
             images, labels = images.to(device), labels.to(device)
             outputs = model(images)
             _, predicted = torch.max(outputs, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+            all_labels.extend(labels.cpu().numpy())
+            all_preds.extend(predicted.cpu().numpy())  
 
-    accuracy = 100 * correct / total
-    print(f"\n✅ Model Accuracy on Test Set: {accuracy:.2f}%")
+    tn, fp, fn, tp = confusion_matrix(all_labels, all_preds).ravel()
 
-# Run Evaluation
+    accuracy = accuracy_score(all_labels, all_preds)
+    precision = precision_score(all_labels, all_preds)
+    f1 = f1_score(all_labels, all_preds)
+
+    tpr = tp / (tp + fn)  
+    fpr = fp / (fp + tn)
+    tnr = tn / (tn + fp)  
+    fnr = fn / (fn + tp)  
+
+    print(f"\n Model Evaluation Metrics:")
+    print(f"Accuracy: {accuracy:.4f}")
+    print(f"Precision: {precision:.4f}")
+    print(f"F1-Score: {f1:.4f}")
+    print(f"True Positive Rate (TPR): {tpr:.4f}")
+    print(f"False Positive Rate (FPR): {fpr:.4f}")
+    print(f"True Negative Rate (TNR): {tnr:.4f}")
+    print(f"False Negative Rate (FNR): {fnr:.4f}")
+
+    metrics_dict = {
+        "Accuracy": [accuracy],
+        "Precision": [precision],
+        "F1-Score": [f1],
+        "TPR (Sensitivity)": [tpr],
+        "FPR": [fpr],
+        "TNR (Specificity)": [tnr],
+        "FNR": [fnr]
+    }
+
+    metrics_df = pd.DataFrame(metrics_dict)
+    metrics_df.to_csv("mri_model_metrics.csv", index=False)
+
+# run evaluation
 evaluate_model(model, test_loader, device)
