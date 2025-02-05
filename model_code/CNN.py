@@ -97,31 +97,44 @@ train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
 test_dataset = ImageDataset(dataset_test)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
+# train function
+def train_model(model, train_loader, criterion, optimizer, num_epochs, device):
+    loss_values = []
+    for epoch in range(N_EPOCHS):
+        model.train()
+        running_loss = 0.0
+        for inputs, labels in train_loader:
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+
+        avg_loss = running_loss / len(train_loader)
+        loss_values.append(avg_loss)
+
+        print(f"Epoch {epoch + 1}/{N_EPOCHS}, Loss: {avg_loss:.4f}")
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(range(1, N_EPOCHS + 1), loss_values, marker='o', color='b', label='Training Loss')
+    plt.title('Training Loss vs Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.grid(True)
+    plt.legend()
+    plt.savefig('model_results/cnn_training_loss_plot.png')
+    plt.close()
+    
 # instantiate the model
 model = MRI_CNN(num_classes=NUM_CLASSES)
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-# training loop
+# training
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
-
-loss_values = []
-for epoch in range(N_EPOCHS):
-    model.train()
-    running_loss = 0.0
-    for inputs, labels in train_loader:
-        optimizer.zero_grad()
-        outputs = model(inputs)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-        running_loss += loss.item()
-
-    avg_loss = running_loss / len(train_loader)
-    loss_values.append(avg_loss)
-
-    print(f"Epoch {epoch + 1}/{N_EPOCHS}, Loss: {avg_loss:.4f}")
+train_model(model, train_loader, criterion, optimizer, N_EPOCHS, device)
     
 # save the trained model
 torch.save(model.state_dict(), "saved_models/vision_transformer_model_basic.pth")
