@@ -11,6 +11,9 @@ import cv2
 from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, precision_score, f1_score, accuracy_score, roc_auc_score, roc_curve
+import os
+
+current_dir = os.getcwd()
 
 # load data
 def dict_to_image(image_dict):
@@ -124,7 +127,7 @@ for epoch in range(N_EPOCHS):
     print(f"Epoch {epoch + 1}/{N_EPOCHS}, Loss: {avg_loss:.4f}")
     
 # save the trained model
-torch.save(model.state_dict(), "DS_Capstone/saved_models/vision_transformer_model_basic.pth")
+torch.save(model.state_dict(), os.path.join(current_dir, "DS_Capstone/saved_models/vision_transformer_model_basic.pth"))
 
 # evaluation
 def evaluate_model(model, test_loader, device):
@@ -195,7 +198,7 @@ def evaluate_model(model, test_loader, device):
     plt.ylabel('True Positive Rate')
     plt.title('ROC Curve')
     plt.legend(loc="lower right")
-    plt.savefig("DS_Capstone/model_results/cnn_roc_curve.png")
+    plt.savefig(os.path.join(current_dir, "DS_Capstone/model_results/cnn_roc_curve.png"))
     plt.close()
 
     # save metrics to CSV
@@ -211,7 +214,7 @@ def evaluate_model(model, test_loader, device):
     }
 
     metrics_df = pd.DataFrame(metrics_dict)
-    metrics_df.to_csv("DS_Capstone/model_results/cnn_metrics.csv", index=False)
+    metrics_df.to_csv(os.path.join(current_dir, "DS_Capstone/model_results/cnn_metrics.csv", index=False))
 
     # save confusion matrix plot
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -225,7 +228,7 @@ def evaluate_model(model, test_loader, device):
     ax.set_yticklabels([0, 1, 2, 3])
     plt.colorbar(ax.imshow(confusion, interpolation='nearest', cmap=plt.cm.Blues))
     plt.tight_layout()
-    plt.savefig("DS_Capstone/model_results/cnn_confusion_matrix.png")
+    plt.savefig(os.path.join(current_dir, "DS_Capstone/model_results/cnn_confusion_matrix.png"))
     plt.close()
 
 # run evaluation
