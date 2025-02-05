@@ -137,7 +137,7 @@ model.to(device)
 train_model(model, train_loader, criterion, optimizer, N_EPOCHS, device)
     
 # save the trained model
-torch.save(model.state_dict(), "saved_models/vision_transformer_model_basic.pth")
+torch.save(model.state_dict(), "saved_models/cnn_model.pth")
 
 # evaluation
 def evaluate_model(model, test_loader, device):
