@@ -48,7 +48,7 @@ class MRIDataset(Dataset):
 
 # hyperparameters
 IMAGE_SIZE = 128
-PATCH_SIZE = 8
+PATCH_SIZE = 16
 NUM_CLASSES = 4
 BATCH_SIZE = 32
 EPOCHS = 15
@@ -68,12 +68,13 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=True)
 #     transforms.Normalize(mean=[0], std=[1])
 # ])
 
-def train_model(model, train_loader, criterion, optimizer, num_epochs):
+def train_model(model, train_loader, criterion, optimizer, num_epochs, device):
     loss_values = []
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
         for inputs, labels in train_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
@@ -98,14 +99,14 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs):
 
 # vision transformer model
 model = VisionTransformer(
-    img_size=128,    
-    patch_size=16,   
+    img_size=IMAGE_SIZE,    
+    patch_size=PATCH_SIZE,   
     embed_dim=384,  
     depth=8,         
     num_heads=6,   
-    mlp_ratio=3.0,   
-    dropout=0.1,    
-    in_chans=1,      
+    mlp_ratio=3.0,     
+    in_chans=1,   
+    drop_rate = 0.1,   
     num_classes=NUM_CLASSES
 )
 
