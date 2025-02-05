@@ -53,6 +53,7 @@ NUM_CLASSES = 4
 BATCH_SIZE = 32
 EPOCHS = 15
 LEARNING_RATE = 1e-4
+N_EPOCHS = 15
 
 # datasets
 train_dataset = MRIDataset(dataset_train)
@@ -66,6 +67,34 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=True)
 #     transforms.ToTensor(),
 #     transforms.Normalize(mean=[0], std=[1])
 # ])
+
+def train_model(model, train_loader, criterion, optimizer, num_epochs):
+    loss_values = []
+    for epoch in range(num_epochs):
+        model.train()
+        running_loss = 0.0
+        for inputs, labels in train_loader:
+            optimizer.zero_grad()
+            outputs = model(inputs)
+            loss = criterion(outputs, labels)
+            loss.backward()
+            optimizer.step()
+            running_loss += loss.item()
+
+        avg_loss = running_loss / len(train_loader)
+        loss_values.append(avg_loss)
+
+        print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {avg_loss:.4f}")
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(range(1, num_epochs + 1), loss_values, marker='o', color='b', label='Training Loss')
+    plt.title('Training Loss vs Epochs')
+    plt.xlabel('Epochs')
+    plt.ylabel('Loss')
+    plt.grid(True)
+    plt.legend()
+    plt.savefig('model_results/vision_transformer_training_loss_plot.png')
+    plt.close()
 
 # vision transformer model
 model = VisionTransformer(
@@ -84,25 +113,10 @@ model = VisionTransformer(
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
 
-# training loop
+# train
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 model.to(device)
-
-for epoch in range(EPOCHS):
-    model.train()
-    running_loss = 0.0
-    for images, labels in train_loader:
-        images, labels = images.to(device), labels.to(device)
-        
-        optimizer.zero_grad()
-        outputs = model(images)
-        loss = criterion(outputs, labels)
-        loss.backward()
-        optimizer.step()
-
-        running_loss += loss.item()
-
-    print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {running_loss/len(train_loader):.4f}")
+train_model(model, train_loader, criterion, optimizer, N_EPOCHS, device)
 
 # save the trained model
 torch.save(model.state_dict(), "saved_models/vision_transformer_model_basic.pth")

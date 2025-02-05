@@ -98,9 +98,9 @@ test_dataset = ImageDataset(dataset_test)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 # train function
-def train_model(model, train_loader, criterion, optimizer, num_epochs, device):
+def train_model(model, train_loader, criterion, optimizer, num_epochs):
     loss_values = []
-    for epoch in range(N_EPOCHS):
+    for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
         for inputs, labels in train_loader:
@@ -114,10 +114,10 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs, device):
         avg_loss = running_loss / len(train_loader)
         loss_values.append(avg_loss)
 
-        print(f"Epoch {epoch + 1}/{N_EPOCHS}, Loss: {avg_loss:.4f}")
+        print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {avg_loss:.4f}")
 
     plt.figure(figsize=(8, 6))
-    plt.plot(range(1, N_EPOCHS + 1), loss_values, marker='o', color='b', label='Training Loss')
+    plt.plot(range(1, num_epochs + 1), loss_values, marker='o', color='b', label='Training Loss')
     plt.title('Training Loss vs Epochs')
     plt.xlabel('Epochs')
     plt.ylabel('Loss')
