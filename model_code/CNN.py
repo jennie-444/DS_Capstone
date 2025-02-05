@@ -211,7 +211,7 @@ def evaluate_model(model, test_loader, device):
     }
 
     metrics_df = pd.DataFrame(metrics_dict)
-    metrics_df.to_csv("DS_Capstone/model_results/cnn_metrics_with_auc.csv", index=False)
+    metrics_df.to_csv("DS_Capstone/model_results/cnn_metrics.csv", index=False)
 
     # save confusion matrix plot
     fig, ax = plt.subplots(figsize=(8, 6))
