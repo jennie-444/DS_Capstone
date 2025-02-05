@@ -8,7 +8,9 @@ from timm.models.vision_transformer import VisionTransformer
 import numpy as np
 import cv2
 import pandas as pd
-from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, accuracy_score
+from sklearn.preprocessing import label_binarize
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix, precision_score, f1_score, accuracy_score, roc_auc_score, roc_curve
 
 # load data
 def dict_to_image(image_dict):
@@ -110,35 +112,49 @@ def evaluate_model(model, test_loader, device):
     model.eval()
     all_labels = []
     all_preds = []
+    all_probs = []
 
     with torch.no_grad():
         for images, labels in test_loader:
             images, labels = images.to(device), labels.to(device)
             outputs = model(images)
-            _, predicted = torch.max(outputs, 1)
+            _, predicted = torch.max(outputs, 1) 
+            probs = torch.softmax(outputs, dim=1)
+            
             all_labels.extend(labels.cpu().numpy())
-            all_preds.extend(predicted.cpu().numpy())  
+            all_preds.extend(predicted.cpu().numpy())
+            all_probs.extend(probs.cpu().numpy())
 
+    # metrics
     tn, fp, fn, tp = confusion_matrix(all_labels, all_preds).ravel()
-
     accuracy = accuracy_score(all_labels, all_preds)
-    precision = precision_score(all_labels, all_preds)
-    f1 = f1_score(all_labels, all_preds)
+    precision = precision_score(all_labels, all_preds, average='macro')
+    f1 = f1_score(all_labels, all_preds, average='macro')
 
-    tpr = tp / (tp + fn)  
-    fpr = fp / (fp + tn)
+    tpr = tp / (tp + fn) 
+    fpr = fp / (fp + tn)  
     tnr = tn / (tn + fp)  
-    fnr = fn / (fn + tp)  
+    fnr = fn / (fn + tp)
 
-    print(f"\n Model Evaluation Metrics:")
-    print(f"Accuracy: {accuracy:.4f}")
-    print(f"Precision: {precision:.4f}")
-    print(f"F1-Score: {f1:.4f}")
-    print(f"True Positive Rate (TPR): {tpr:.4f}")
-    print(f"False Positive Rate (FPR): {fpr:.4f}")
-    print(f"True Negative Rate (TNR): {tnr:.4f}")
-    print(f"False Negative Rate (FNR): {fnr:.4f}")
+    # roc curve
+    all_labels_bin = label_binarize(all_labels, classes=[0, 1, 2, 3])
+    auc = roc_auc_score(all_labels_bin, np.array(all_probs), multi_class='ovr', average='macro')
+    fpr_class, tpr_class, _ = roc_curve(all_labels_bin.ravel(), np.array(all_probs).ravel())
+    
+    # plot roc curve
+    plt.figure()
+    plt.plot(fpr_class, tpr_class, label='ROC curve (area = %0.2f)' % auc)
+    plt.plot([0, 1], [0, 1], color='navy', linestyle='--')
+    plt.xlim([0.0, 1.0])
+    plt.ylim([0.0, 1.05])
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('Receiver Operating Characteristic')
+    plt.legend(loc="lower right")
+    plt.savefig("C:/Users/jenni/virtualEnv/DS Capstone/DS_Capstone/model_results/vision_transformer_roc_curve.png")
+    plt.close()
 
+    # save metrics to csv
     metrics_dict = {
         "Accuracy": [accuracy],
         "Precision": [precision],
@@ -146,11 +162,12 @@ def evaluate_model(model, test_loader, device):
         "TPR (Sensitivity)": [tpr],
         "FPR": [fpr],
         "TNR (Specificity)": [tnr],
-        "FNR": [fnr]
+        "FNR": [fnr],
+        "AUC": [auc]
     }
 
     metrics_df = pd.DataFrame(metrics_dict)
-    metrics_df.to_csv("mri_model_metrics.csv", index=False)
+    metrics_df.to_csv("C:/Users/jenni/virtualEnv/DS Capstone/DS_Capstone/model_results/vision_transformer_metrics_with_auc.csv", index=False)
 
 # run evaluation
 evaluate_model(model, test_loader, device)
