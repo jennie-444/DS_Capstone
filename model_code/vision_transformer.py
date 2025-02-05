@@ -105,7 +105,7 @@ for epoch in range(EPOCHS):
     print(f"Epoch {epoch+1}/{EPOCHS}, Loss: {running_loss/len(train_loader):.4f}")
 
 # save the trained model
-torch.save(model.state_dict(), "DS_Capstone/model_results/vision_transformer_model_basic.pth")
+torch.save(model.state_dict(), "DS_Capstone/saved_models/vision_transformer_model_basic.pth")
 
 # evaluation
 def evaluate_model(model, test_loader, device):

@@ -124,7 +124,7 @@ for epoch in range(N_EPOCHS):
     print(f"Epoch {epoch + 1}/{N_EPOCHS}, Loss: {avg_loss:.4f}")
     
 # save the trained model
-torch.save(model.state_dict(), "DS_Capstone/model_results/vision_transformer_model_basic.pth")
+torch.save(model.state_dict(), "DS_Capstone/saved_models/vision_transformer_model_basic.pth")
 
 # evaluation
 def evaluate_model(model, test_loader, device):
