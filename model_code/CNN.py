@@ -123,7 +123,7 @@ def train_model(model, train_loader, criterion, optimizer, num_epochs):
     plt.ylabel('Loss')
     plt.grid(True)
     plt.legend()
-    plt.savefig('model_results/cnn_training_loss_plot.png')
+    plt.savefig('model_results/cnn/imbalance_training_loss_plot.png')
     plt.close()
     
 # instantiate the model
@@ -137,7 +137,7 @@ model.to(device)
 train_model(model, train_loader, criterion, optimizer, N_EPOCHS, device)
     
 # save the trained model
-torch.save(model.state_dict(), "saved_models/cnn_model.pth")
+torch.save(model.state_dict(), "saved_models/cnn/imbalance.pth")
 
 # evaluation
 def evaluate_model(model, test_loader, device):
@@ -208,7 +208,7 @@ def evaluate_model(model, test_loader, device):
     plt.ylabel('True Positive Rate')
     plt.title('ROC Curve')
     plt.legend(loc="lower right")
-    plt.savefig("model_results/cnn_roc_curve.png")
+    plt.savefig("model_results/cnn/imbalance_roc_curve.png")
     plt.close()
 
     # save metrics to CSV
@@ -224,7 +224,7 @@ def evaluate_model(model, test_loader, device):
     }
 
     metrics_df = pd.DataFrame(metrics_dict)
-    metrics_df.to_csv("model_results/cnn_metrics.csv", index=False)
+    metrics_df.to_csv("model_results/cnn/imbalance_metrics.csv", index=False)
 
     # save confusion matrix plot
     fig, ax = plt.subplots(figsize=(8, 6))
@@ -238,7 +238,7 @@ def evaluate_model(model, test_loader, device):
     ax.set_yticklabels([0, 1, 2, 3])
     plt.colorbar(ax.imshow(confusion, interpolation='nearest', cmap=plt.cm.Blues))
     plt.tight_layout()
-    plt.savefig("model_results/cnn_confusion_matrix.png")
+    plt.savefig("model_results/cnn/imbalance_confusion_matrix.png")
     plt.close()
 
 # run evaluation
