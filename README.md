@@ -28,10 +28,10 @@ In the `data_preprocess.ipynb` we have conducted various preprocessing steps for
     - `CNN.py`
     - `vision_transformer.py`
 - `model_results`
-    -`cnn`
+    - `cnn`
     - `transformers`
 - `saved_models`
-     -`cnn`
+    - `cnn`
     - `transformers`
 - `requirements.txt`
 
