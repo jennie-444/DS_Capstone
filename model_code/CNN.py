@@ -98,12 +98,13 @@ test_dataset = ImageDataset(dataset_test)
 test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=True)
 
 # train function
-def train_model(model, train_loader, criterion, optimizer, num_epochs):
+def train_model(model, train_loader, criterion, optimizer, num_epochs, device):
     loss_values = []
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
         for inputs, labels in train_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
             optimizer.zero_grad()
             outputs = model(inputs)
             loss = criterion(outputs, labels)
