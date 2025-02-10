@@ -37,4 +37,8 @@ In the `data_preprocess.ipynb` we have conducted various preprocessing steps for
 
 #### Instructions to Run Code
 
-
+1. Clone the repo using `https://github.com/jennie-444/DS_Capstone.git`
+2. Navigate to the projet directory
+3. Set up a virtual environment (optional)
+4. Install the required dependencies from the requirements.txt file `pip install -r requirements.txt`
+5. Run the model code using...
