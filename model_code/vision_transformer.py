@@ -1,65 +1,11 @@
 import torch
 import torch.nn as nn
 import torch.optim as optim
-import torchvision.transforms as transforms
-from torch.utils.data import DataLoader, Dataset
-from datasets import load_dataset
+import os
+import json
+#import torchvision.transforms as transforms
 from timm.models.vision_transformer import VisionTransformer
-import numpy as np
-import cv2
-import pandas as pd
-from sklearn.preprocessing import label_binarize
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix, precision_score, f1_score, accuracy_score, roc_auc_score, roc_curve
-
-# load data
-def dict_to_image(image_dict):
-    if isinstance(image_dict, dict) and 'bytes' in image_dict:
-        byte_string = image_dict['bytes']
-        nparr = np.frombuffer(byte_string, np.uint8)
-        img = cv2.imdecode(nparr, cv2.IMREAD_GRAYSCALE)
-        return img
-    else:
-        raise TypeError(f"Expected dictionary with 'bytes' key, got {type(image_dict)}")
-
-dataset_train = load_dataset('Falah/Alzheimer_MRI', split='train')
-dataset_train = dataset_train.to_pandas()
-dataset_train['img_arr'] = dataset_train['image'].apply(dict_to_image)
-dataset_train.drop("image", axis=1, inplace=True)
-dataset_test = load_dataset('Falah/Alzheimer_MRI', split='test')
-dataset_test = dataset_test.to_pandas()
-dataset_test['img_arr'] = dataset_test['image'].apply(dict_to_image)
-dataset_test.drop("image", axis=1, inplace=True)
-
-# dataset class
-class MRIDataset(Dataset):
-    def __init__(self, dataframe):
-        self.dataframe = dataframe
-
-    def __len__(self):
-        return len(self.dataframe)
-
-    def __getitem__(self, idx):
-        img_arr = self.dataframe.iloc[idx]["img_arr"]  
-        label = self.dataframe.iloc[idx]["label"] 
-        img_tensor = torch.tensor(img_arr, dtype=torch.float32).unsqueeze(0)
-        label_tensor = torch.tensor(label, dtype=torch.long)
-        return img_tensor, label_tensor
-
-# hyperparameters
-IMAGE_SIZE = 128
-PATCH_SIZE = 16
-NUM_CLASSES = 4
-BATCH_SIZE = 32
-EPOCHS = 15
-LEARNING_RATE = 1e-4
-N_EPOCHS = 15
-
-# datasets
-train_dataset = MRIDataset(dataset_train)
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-test_dataset = MRIDataset(dataset_test)
-test_loader = DataLoader(test_dataset, batch_size=32, shuffle=True)
+from functions import train_model, load_data, evaluate_model
 
 # Define transformations
 # transform = transforms.Compose([
@@ -68,161 +14,67 @@ test_loader = DataLoader(test_dataset, batch_size=32, shuffle=True)
 #     transforms.Normalize(mean=[0], std=[1])
 # ])
 
-def train_model(model, train_loader, criterion, optimizer, num_epochs, device):
-    loss_values = []
-    for epoch in range(num_epochs):
-        model.train()
-        running_loss = 0.0
-        for inputs, labels in train_loader:
-            inputs, labels = inputs.to(device), labels.to(device)
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
-            running_loss += loss.item()
-
-        avg_loss = running_loss / len(train_loader)
-        loss_values.append(avg_loss)
-
-        print(f"Epoch {epoch + 1}/{num_epochs}, Loss: {avg_loss:.4f}")
-
-    plt.figure(figsize=(8, 6))
-    plt.plot(range(1, num_epochs + 1), loss_values, marker='o', color='b', label='Training Loss')
-    plt.title('Training Loss vs Epochs')
-    plt.xlabel('Epochs')
-    plt.ylabel('Loss')
-    plt.grid(True)
-    plt.legend()
-    plt.savefig('model_results/transformer/vision_transformer_training_loss_plot.png')
-    plt.close()
-
-# vision transformer model
-model = VisionTransformer(
-    img_size=IMAGE_SIZE,    
-    patch_size=PATCH_SIZE,   
-    embed_dim=384,  
-    depth=8,         
-    num_heads=6,   
-    mlp_ratio=3.0,     
-    in_chans=1,   
-    drop_rate = 0.1,   
-    num_classes=NUM_CLASSES
-)
-
-# define loss and optimizer
-criterion = nn.CrossEntropyLoss()
-optimizer = optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-4)
-
-# train
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-model.to(device)
-train_model(model, train_loader, criterion, optimizer, N_EPOCHS, device)
-
-# save the trained model
-torch.save(model.state_dict(), "saved_models/transformer/vision_transformer_model_basic.pth")
-
-# evaluation
-def evaluate_model(model, test_loader, device):
-    model.eval()
-    all_labels = []
-    all_preds = []
-    all_probs = []
-
-    with torch.no_grad():
-        for images, labels in test_loader:
-            images, labels = images.to(device), labels.to(device)
-            outputs = model(images)
-            _, predicted = torch.max(outputs, 1) 
-            probs = torch.softmax(outputs, dim=1)
-            
-            all_labels.extend(labels.cpu().numpy())
-            all_preds.extend(predicted.cpu().numpy())
-            all_probs.extend(probs.cpu().numpy())
-
-    # compute confusion matrix for 4 classes
-    confusion = confusion_matrix(all_labels, all_preds, labels=[0, 1, 2, 3])
+# run training on vision transformer image classifier
+def run_transformer(
+    batch_size, save_dir, dropout, lr, epochs, patch_size
+):
+    NUM_CLASSES = 4
+    IMAGE_SIZE = 128
+    NUM_CLASSES = 4
+    train_loader, test_loader = load_data(batch_size)
     
-    # metrics
-    accuracy = accuracy_score(all_labels, all_preds)
-    precision = precision_score(all_labels, all_preds, average='macro')
-    f1 = f1_score(all_labels, all_preds, average='macro')
+    # instantiate the model
+    model = VisionTransformer(
+        img_size=IMAGE_SIZE,    
+        patch_size=patch_size,   
+        embed_dim=384,  
+        depth=8,         
+        num_heads=6,   
+        mlp_ratio=3.0,     
+        in_chans=1,   
+        drop_rate = dropout,   
+        num_classes=NUM_CLASSES
+    )
+    criterion = nn.CrossEntropyLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
 
-    # calculate TPR, FPR, TNR, FNR for each class
-    tpr_list = []
-    fpr_list = []
-    tnr_list = []
-    fnr_list = []
+    # training
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model.to(device)
+    trained_model = train_model(save_dir, model, train_loader, device, optimizer, criterion, epochs)
     
-    for i in range(confusion.shape[0]):
-        tp = confusion[i, i]
-        fn = confusion[i, :].sum() - tp
-        fp = confusion[:, i].sum() - tp
-        tn = confusion.sum() - (tp + fn + fp)
-        
-        tpr = tp / (tp + fn)  
-        fpr = fp / (fp + tn)  
-        tnr = tn / (tn + fp)  
-        fnr = fn / (fn + tp)  
+    # run evaluation
+    evaluate_model(trained_model, test_loader, device)
 
-        tpr_list.append(tpr)
-        fpr_list.append(fpr)
-        tnr_list.append(tnr)
-        fnr_list.append(fnr)
+# run grid search
+SAVE_PATH = "model_results/transformer"
+DROPOUT = [0.1, 0.3, 0.5]
+LR = [0.01, 0.001, 0.0001]
+EPOCHS = [10, 25, 50]
+BATCH_SIZE = [32, 64, 100]
+PATCH_SIZE = [16, 32]
+COUNT = 1
 
-    # average TPR, FPR, TNR, FNR across all classes
-    avg_tpr = np.mean(tpr_list)
-    avg_fpr = np.mean(fpr_list)
-    avg_tnr = np.mean(tnr_list)
-    avg_fnr = np.mean(fnr_list)
-
-    # ROC Curve and AUC
-    all_labels_bin = label_binarize(all_labels, classes=[0, 1, 2, 3])  
-    auc = roc_auc_score(all_labels_bin, np.array(all_probs), multi_class='ovr', average='macro')
-    fpr_class, tpr_class, _ = roc_curve(all_labels_bin.ravel(), np.array(all_probs).ravel())
-
-    # plot ROC Curve
-    plt.figure()
-    plt.plot(fpr_class, tpr_class, label='ROC curve (area = %0.2f)' % auc)
-    plt.plot([0, 1], [0, 1], linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('ROC Curve')
-    plt.legend(loc="lower right")
-    plt.savefig("model_results/transformer/vision_transformer_roc_curve.png")
-    plt.close()
-
-    # save metrics to CSV
-    metrics_dict = {
-        "Accuracy": [accuracy],
-        "Precision": [precision],
-        "F1-Score": [f1],
-        "Avg TPR (Sensitivity)": [avg_tpr],
-        "Avg FPR": [avg_fpr],
-        "Avg TNR (Specificity)": [avg_tnr],
-        "Avg FNR": [avg_fnr],
-        "AUC": [auc]
-    }
-
-    metrics_df = pd.DataFrame(metrics_dict)
-    metrics_df.to_csv("model_results/transformer/vision_transformer_metrics.csv", index=False)
-
-    # save confusion matrix plot
-    fig, ax = plt.subplots(figsize=(8, 6))
-    ax.imshow(confusion, interpolation='nearest', cmap=plt.cm.Blues)
-    ax.set_title('Confusion Matrix')
-    ax.set_xlabel('Predicted Label')
-    ax.set_ylabel('True Label')
-    ax.set_xticks(np.arange(4))
-    ax.set_yticks(np.arange(4))
-    ax.set_xticklabels([0, 1, 2, 3])
-    ax.set_yticklabels([0, 1, 2, 3])
-    plt.colorbar(ax.imshow(confusion, interpolation='nearest', cmap=plt.cm.Blues))
-    plt.tight_layout()
-    plt.savefig("model_results/transformer/vision_transformer_confusion_matrix.png")
-    plt.close()
-
-# run evaluation
-evaluate_model(model, test_loader, device)
+for i in DROPOUT:
+    for j in LR:
+        for k in EPOCHS:
+            for n in BATCH_SIZE:
+                for m in PATCH_SIZE:
+                    # make save directory if it does not exist
+                    SAVE_DIR = os.path.join(SAVE_PATH, str(COUNT))
+                    if not os.path.exists(SAVE_DIR):
+                        os.makedirs(SAVE_DIR)
+                    # train and eval, save results
+                    run_transformer(n, SAVE_DIR, i, j, k, m)
+                    # save model configuration
+                    config = {
+                        "dropout": i,
+                        "learning_rate": j,
+                        "epochs": k,
+                        "batch_size": n,
+                        "patch_size": m,
+                        "balanced": False,
+                        "data_preprocessing": None
+                    }
+                    with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
+                        json.dump(config, json_file, indent=4)
