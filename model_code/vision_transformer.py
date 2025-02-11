@@ -44,7 +44,7 @@ def run_transformer(
     trained_model = train_model(save_dir, model, train_loader, device, optimizer, criterion, epochs)
     
     # run evaluation
-    evaluate_model(trained_model, test_loader, device)
+    evaluate_model(trained_model, test_loader, device, save_dir)
 
 # run grid search
 SAVE_PATH = "model_results/transformer"
