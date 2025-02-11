@@ -49,9 +49,9 @@ def run_transformer(
 # run grid search
 SAVE_PATH = "model_results/transformer"
 DROPOUT = [0.1, 0.3, 0.5]
-LR = [0.01, 0.001, 0.0001]
-EPOCHS = [10, 25, 50]
-BATCH_SIZE = [32, 64, 100]
+LR = [0.001, 0.0001]
+EPOCHS = [50]
+BATCH_SIZE = [32]
 PATCH_SIZE = [16, 32]
 COUNT = 1
 
