@@ -78,3 +78,4 @@ for i in DROPOUT:
                     }
                     with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
                         json.dump(config, json_file, indent=4)
+                    COUNT+=1
