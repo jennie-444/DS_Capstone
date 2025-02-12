@@ -16,26 +16,31 @@ There are just 2 columns in the dataset consisting of the image and the label as
 In the `data_preprocess.ipynb` we have conducted various preprocessing steps for our dataset. Such preprocessing steps include normalization techniques such as min/max scaling, z-score standardization, and local contrast normalization. We also preformed image cropping to remove unneeded parts of the image. Lastly we performed noise reduction using methods such as gaussian blur, median blur, and bilateral filter. Any of these preprocessing functions can be called on the data before model training. 
 
 #### CNN
+`CNN.py` contains code to train a CNN for multi-class classification, conducting grid search over various hyperparameters. 
 
 #### Vision Transformer
+`vision_transformer.py` contains code to train a vision transformer for multi-class classification, conducting grid search over various hyperparameters. 
 
 #### Repo Structure
-- `data_code`
-    - `data_load_explore.ipynb`
-    - `data_preprocess.ipynb`
-    - `data_rebalancing.ipynb`
-- `model_code`
-    - `CNN.py`
-    - `vision_transformer.py`
-- `model_results`
+- `data_code`: code related to preprocessing and data exploration
+    - `data_load_explore.ipynb`: exploration
+    - `data_preprocess.ipynb`: preprocessing functions for normalization, image cropping, and noise reduction
+    - `data_rebalancing.ipynb`: rebalancing functions
+- `model_code`: train and evaluation code for models
+    - `CNN.py`: train, eval, grid search. Saves CNN configuration, confusion matrix, weights, metrics, ROC curve, 
+    - `vision_transformer.py`: train, eval, grid search. Saves vision transformer configuration, confusion matrix, weights, metrics, ROC curve, 
+- `model_results`: stores model results
     - `cnn`
     - `transformers`
-- `requirements.txt`
+- `requirements.txt`: dependencies
 
 #### Instructions to Run Code
 
 1. Clone the repo using `https://github.com/jennie-444/DS_Capstone.git`
-2. Navigate to the projet directory
+2. Navigate to the project directory
 3. Set up a virtual environment (optional)
 4. Install the required dependencies from the requirements.txt file `pip install -r requirements.txt`
-5. Run the model code using...
+5. Optional: before running model code change the hyperparameters to conduct grid search over.
+6. Optional: before running model code change the hsave directory you'd like to save your results to.
+7. Run the CNN model training and evaluation using `python model_code/CNN.py`.
+8. Run the transformer model training and evaluation using `python model_code/CNN.py`

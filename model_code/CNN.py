@@ -67,11 +67,14 @@ def run_cnn(
     evaluate_model(trained_model, test_loader, device, save_dir)
 
 # run grid search
+# Note: Change values below to be desired save path and search parameters
 SAVE_PATH = "model_results/cnn"
 DROPOUT = [0.1, 0.3, 0.5]
 LR = [0.001, 0.0001]
 EPOCHS = [10, 50]
 BATCH_SIZE = [32]
+
+# experiment #
 COUNT = 1
 
 for i in DROPOUT:
