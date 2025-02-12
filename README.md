@@ -15,6 +15,9 @@ There are just 2 columns in the dataset consisting of the image and the label as
 #### Image Preprocessing
 In the `data_preprocess.ipynb` we have conducted various preprocessing steps for our dataset. Such preprocessing steps include normalization techniques such as min/max scaling, z-score standardization, and local contrast normalization. We also preformed image cropping to remove unneeded parts of the image. Lastly we performed noise reduction using methods such as gaussian blur, median blur, and bilateral filter. Any of these preprocessing functions can be called on the data before model training. 
 
+#### Rebalancing
+Our dataset contains imbalanced classes. Our class counts in the training data are 724 images for mild demented, 49 images of moderate demented, 2566 images of non-demented, and 1781 images of very mild demented. The test set is similarly distributed. To combat this imbalance we have utilized data augmentation technqiues to generate more samples in underrepresented classes. We perform random transformations including flips and rotations. 
+
 #### CNN
 `CNN.py` contains code to train a CNN for multi-class classification, conducting grid search over various hyperparameters. 
 
