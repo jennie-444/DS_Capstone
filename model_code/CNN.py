@@ -69,7 +69,7 @@ def run_cnn(
 # run grid search
 SAVE_PATH = "model_results/cnn"
 DROPOUT = [0.1, 0.3, 0.5]
-LR = [00.001, 0.0001]
+LR = [0.001, 0.0001]
 EPOCHS = [10, 50]
 BATCH_SIZE = [32]
 COUNT = 1
