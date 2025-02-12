@@ -3,7 +3,6 @@ import torch.nn as nn
 import torch.optim as optim
 import os
 import json
-#import torchvision.transforms as transforms
 from functions import train_model, load_data, evaluate_model
 
 # CNN code

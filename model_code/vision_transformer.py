@@ -3,16 +3,8 @@ import torch.nn as nn
 import torch.optim as optim
 import os
 import json
-#import torchvision.transforms as transforms
 from timm.models.vision_transformer import VisionTransformer
 from functions import train_model, load_data, evaluate_model
-
-# Define transformations
-# transform = transforms.Compose([
-#     transforms.Resize((IMAGE_SIZE, IMAGE_SIZE)),
-#     transforms.ToTensor(),
-#     transforms.Normalize(mean=[0], std=[1])
-# ])
 
 # run training on vision transformer image classifier
 def run_transformer(
