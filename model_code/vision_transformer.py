@@ -54,21 +54,22 @@ for i in DROPOUT:
     for j in LR:
         for k in EPOCHS:
             for n in BATCH_SIZE:
-                # make save directory if it does not exist
-                SAVE_DIR = os.path.join(SAVE_PATH, str(COUNT))
-                if not os.path.exists(SAVE_DIR):
-                    os.makedirs(SAVE_DIR)
-                # train and eval, save results
-                run_transformer(n, SAVE_DIR, i, j, k)
-                # save model configuration
-                config = {
-                    "dropout": i,
-                    "learning_rate": j,
-                    "epochs": k,
-                    "batch_size": n,
-                    "balanced": False,
-                    "data_preprocessing": None
-                }
-                with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
-                    json.dump(config, json_file, indent=4)
+                if(COUNT not in [1,2,3,4,5,6,7,8,9,10]):
+                    # make save directory if it does not exist
+                    SAVE_DIR = os.path.join(SAVE_PATH, str(COUNT))
+                    if not os.path.exists(SAVE_DIR):
+                        os.makedirs(SAVE_DIR)
+                    # train and eval, save results
+                    run_transformer(n, SAVE_DIR, i, j, k)
+                    # save model configuration
+                    config = {
+                        "dropout": i,
+                        "learning_rate": j,
+                        "epochs": k,
+                        "batch_size": n,
+                        "balanced": False,
+                        "data_preprocessing": None
+                    }
+                    with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
+                        json.dump(config, json_file, indent=4)
                 COUNT+=1
