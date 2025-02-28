@@ -71,7 +71,7 @@ def run_cnn(
 
 # run grid search
 # Note: Change values below to be desired save path and search parameters
-SAVE_PATH = "model_results/cnn"
+SAVE_PATH = "model_results/cnn_v1/cnn_raw/raw_balanced"
 DROPOUT = [0.1, 0.3, 0.5]
 LR = [0.001, 0.0001]
 EPOCHS = [10, 50]
