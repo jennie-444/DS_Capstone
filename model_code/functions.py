@@ -5,6 +5,8 @@ import numpy as np
 import cv2
 import pandas as pd
 from torch.utils.data import DataLoader, Dataset
+import torch.utils.data as data
+from torchvision import transforms
 from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, precision_score, f1_score, accuracy_score, roc_auc_score, roc_curve
@@ -48,6 +50,50 @@ def load_data(batch_size):
     # data loader
     train_dataset = ImageDataset(dataset_train)
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    test_dataset = ImageDataset(dataset_test)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
+    return train_loader, test_loader
+
+# load data and rebalance data
+def rebalance_load_data(batch_size):
+    dataset_train = load_dataset('Falah/Alzheimer_MRI', split='train')
+    dataset_train = dataset_train.to_pandas()
+    dataset_train['img_arr'] = dataset_train['image'].apply(dict_to_image)
+    dataset_train.drop("image", axis=1, inplace=True)
+    dataset_test = load_dataset('Falah/Alzheimer_MRI', split='test')
+    dataset_test = dataset_test.to_pandas()
+    dataset_test['img_arr'] = dataset_test['image'].apply(dict_to_image)
+    dataset_test.drop("image", axis=1, inplace=True)
+
+    test_dataset = ImageDataset(dataset_test)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
+
+    transform = transforms.Compose([
+        transforms.RandomRotation(30),  
+        transforms.RandomHorizontalFlip(),  
+        transforms.RandomVerticalFlip(),  
+        transforms.ToTensor()
+    ])
+
+    # calculate class weights for balancing
+    class_counts = np.bincount(dataset_train.label)
+    class_weights = 1. / class_counts
+    weights = class_weights[dataset_train.label]
+    train_sampler = data.WeightedRandomSampler(weights, len(weights))
+
+    # create datasets with transformations applied
+    # for training apply data augmentation transformations
+    dataset_train.transform = transform
+
+    train_dataset = ImageDataset(dataset_train)
+
+    train_loader = DataLoader(
+        train_dataset, 
+        batch_size=32,
+        sampler=train_sampler
+    )
+
     test_dataset = ImageDataset(dataset_test)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
