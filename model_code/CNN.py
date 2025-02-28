@@ -76,7 +76,7 @@ DROPOUT = [0.1, 0.3, 0.5]
 LR = [0.001, 0.0001]
 EPOCHS = [10, 50]
 BATCH_SIZE = [32]
-BALANCE = True
+BALANCED = True
 
 # experiment #
 COUNT = 1
@@ -89,7 +89,7 @@ for i, j, k, n in params:
     if not os.path.exists(SAVE_DIR):
         os.makedirs(SAVE_DIR)
     # train and eval, save results
-    run_cnn(n, SAVE_DIR, i, j, k, BALANCE)
+    run_cnn(n, SAVE_DIR, i, j, k, BALANCED)
     # save model configuration
     config = {
         "dropout": i,
