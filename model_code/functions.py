@@ -10,6 +10,7 @@ from torchvision import transforms
 from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, precision_score, f1_score, accuracy_score, roc_auc_score, roc_curve
+from PIL import Image
 
 # dataset class
 class ImageDataset(Dataset):
@@ -24,6 +25,29 @@ class ImageDataset(Dataset):
         label = self.dataframe.iloc[idx]["label"]
         image = torch.tensor(image, dtype=torch.float32).unsqueeze(0)
         label = torch.tensor(label, dtype=torch.long)
+        return image, label
+
+# dataset class with transformations for rebalancing, data augmentation
+class ImageDatasetRebalancing(Dataset):
+    def __init__(self, dataframe, transform):
+        self.dataframe = dataframe
+        self.transform = transform
+        
+    def __len__(self):
+        return len(self.dataframe)
+    
+    def __getitem__(self, idx):
+        image = self.dataframe.iloc[idx]["img_arr"]
+        label = self.dataframe.iloc[idx]["label"]
+
+        if isinstance(image, np.ndarray):
+            image = Image.fromarray(image)
+
+        if self.transform:
+            image = self.transform(image)
+        
+        label = torch.tensor(label, dtype=torch.long)
+            
         return image, label
 
 # convert image_dict to image
@@ -69,6 +93,7 @@ def rebalance_load_data(batch_size):
     test_dataset = ImageDataset(dataset_test)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
+    # random transformations
     transform = transforms.Compose([
         transforms.RandomRotation(30),  
         transforms.RandomHorizontalFlip(),  
@@ -84,18 +109,13 @@ def rebalance_load_data(batch_size):
 
     # create datasets with transformations applied
     # for training apply data augmentation transformations
-    dataset_train.transform = transform
-
-    train_dataset = ImageDataset(dataset_train)
+    train_dataset = ImageDatasetRebalancing(dataset_train, transform=transform)
 
     train_loader = DataLoader(
         train_dataset, 
         batch_size=32,
         sampler=train_sampler
     )
-
-    test_dataset = ImageDataset(dataset_test)
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
     return train_loader, test_loader
 
