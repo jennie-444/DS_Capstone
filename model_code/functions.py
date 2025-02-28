@@ -29,10 +29,29 @@ class ImageDataset(Dataset):
 
 # dataset class with transformations for rebalancing, data augmentation
 class ImageDatasetRebalancing(Dataset):
-    def __init__(self, dataframe, transform):
+    def __init__(self, dataframe, transform=None, oversample=False):
         self.dataframe = dataframe
         self.transform = transform
+        self.oversample = oversample
         
+        if self.oversample:
+            # Determine how many new samples to generate
+            class_counts = np.bincount(self.dataframe.label)
+            max_class_count = max(class_counts)
+            
+            # For each class, generate new samples (augmentation)
+            new_samples = []
+            for label in np.unique(self.dataframe.label):
+                class_data = self.dataframe[self.dataframe.label == label]
+                current_count = len(class_data)
+                # Generate enough new samples to match max_class_count
+                num_new_samples = max_class_count - current_count
+                if num_new_samples > 0:
+                    augmented_data = class_data.sample(n=num_new_samples, replace=True)
+                    new_samples.append(augmented_data)
+            # Append the new samples to the original dataset
+            self.dataframe = pd.concat([self.dataframe] + new_samples, ignore_index=True)
+    
     def __len__(self):
         return len(self.dataframe)
     
@@ -47,7 +66,6 @@ class ImageDatasetRebalancing(Dataset):
             image = self.transform(image)
         
         label = torch.tensor(label, dtype=torch.long)
-            
         return image, label
 
 # convert image_dict to image
@@ -93,7 +111,7 @@ def rebalance_load_data(batch_size):
     test_dataset = ImageDataset(dataset_test)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
 
-    # random transformations
+    # Random transformations for data augmentation
     transform = transforms.Compose([
         transforms.RandomRotation(30),  
         transforms.RandomHorizontalFlip(),  
@@ -101,22 +119,18 @@ def rebalance_load_data(batch_size):
         transforms.ToTensor()
     ])
 
-    # calculate class weights for balancing
-    class_counts = np.bincount(dataset_train.label)
-    class_weights = 1. / class_counts
-    weights = class_weights[dataset_train.label]
-    train_sampler = data.WeightedRandomSampler(weights, len(weights))
+    # Initialize the dataset with oversampling enabled
+    train_dataset = ImageDataset(dataset_train, transform=transform, oversample=True)
 
-    # create datasets with transformations applied
-    # for training apply data augmentation transformations
-    train_dataset = ImageDatasetRebalancing(dataset_train, transform=transform)
-
+    # DataLoader to load the data in batches
     train_loader = DataLoader(
         train_dataset, 
         batch_size=32,
-        sampler=train_sampler
+        shuffle=True
     )
 
+    # Checking the total number of samples after oversampling
+    print(f"Total samples in the augmented dataset: {len(train_dataset)}")
     return train_loader, test_loader
 
 # train function
