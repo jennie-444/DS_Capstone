@@ -84,22 +84,21 @@ COUNT = 1
 params = itertools.product(DROPOUT, LR, EPOCHS, BATCH_SIZE)
 
 for i, j, k, n in params:
-    if COUNT in [11, 12]:
-        # make save directory if it does not exist
-        SAVE_DIR = os.path.join(SAVE_PATH, str(COUNT))
-        if not os.path.exists(SAVE_DIR):
-            os.makedirs(SAVE_DIR)
-        # train and eval, save results
-        run_cnn(n, SAVE_DIR, i, j, k, BALANCE)
-        # save model configuration
-        config = {
-            "dropout": i,
-            "learning_rate": j,
-            "epochs": k,
-            "batch_size": n,
-            "balanced": False,
-            "data_preprocessing": None
-        }
-        with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
-            json.dump(config, json_file, indent=4)
+    # make save directory if it does not exist
+    SAVE_DIR = os.path.join(SAVE_PATH, str(COUNT))
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
+    # train and eval, save results
+    run_cnn(n, SAVE_DIR, i, j, k, BALANCE)
+    # save model configuration
+    config = {
+        "dropout": i,
+        "learning_rate": j,
+        "epochs": k,
+        "batch_size": n,
+        "balanced": False,
+        "data_preprocessing": None
+    }
+    with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
+        json.dump(config, json_file, indent=4)
     COUNT+=1

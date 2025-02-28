@@ -4,17 +4,22 @@ import torch.optim as optim
 import os
 import json
 from timm.models.vision_transformer import VisionTransformer
-from functions import train_model, load_data, evaluate_model
+import itertools
+from functions import train_model, load_data, evaluate_model, rebalance_load_data
 
 # run training on vision transformer image classifier
 def run_transformer(
-    batch_size, save_dir, dropout, lr, epochs
+    batch_size, save_dir, dropout, lr, epochs, balance
 ):
     NUM_CLASSES = 4
     IMAGE_SIZE = 128
     NUM_CLASSES = 4
     PATCH_SIZE = 16
-    train_loader, test_loader = load_data(batch_size)
+
+    if balance:
+        train_loader, test_loader = rebalance_load_data(batch_size)   
+    else:
+        train_loader, test_loader = load_data(batch_size)
     
     # instantiate the model
     model = VisionTransformer(
@@ -41,34 +46,34 @@ def run_transformer(
 
 # run grid search
 # Note: Change values below to be desired save path and search parameters
-SAVE_PATH = "model_results/transformer"
+SAVE_PATH = "model_results/transformer_v1/transformer_raw/raw_balanced"
 DROPOUT = [0.1, 0.3, 0.5]
 LR = [0.001, 0.0001]
 EPOCHS = [10, 50]
 BATCH_SIZE = [32]
+BALANCE = True
 
 # experiment #
 COUNT = 1
 
-for i in DROPOUT:
-    for j in LR:
-        for k in EPOCHS:
-            for n in BATCH_SIZE:
-                # make save directory if it does not exist
-                SAVE_DIR = os.path.join(SAVE_PATH, str(COUNT))
-                if not os.path.exists(SAVE_DIR):
-                    os.makedirs(SAVE_DIR)
-                # train and eval, save results
-                run_transformer(n, SAVE_DIR, i, j, k)
-                # save model configuration
-                config = {
-                    "dropout": i,
-                    "learning_rate": j,
-                    "epochs": k,
-                    "batch_size": n,
-                    "balanced": False,
-                    "data_preprocessing": None
-                }
-                with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
-                    json.dump(config, json_file, indent=4)
-                COUNT+=1
+params = itertools.product(DROPOUT, LR, EPOCHS, BATCH_SIZE)
+
+for i, j, k, n in params:
+    # make save directory if it does not exist
+    SAVE_DIR = os.path.join(SAVE_PATH, str(COUNT))
+    if not os.path.exists(SAVE_DIR):
+        os.makedirs(SAVE_DIR)
+    # train and eval, save results
+    run_transformer(n, SAVE_DIR, i, j, k)
+    # save model configuration
+    config = {
+        "dropout": i,
+        "learning_rate": j,
+        "epochs": k,
+        "batch_size": n,
+        "balanced": False,
+        "data_preprocessing": None
+    }
+    with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
+        json.dump(config, json_file, indent=4)
+    COUNT+=1
