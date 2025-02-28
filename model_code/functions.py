@@ -120,7 +120,7 @@ def rebalance_load_data(batch_size):
     ])
 
     # Initialize the dataset with oversampling enabled
-    train_dataset = ImageDataset(dataset_train, transform=transform, oversample=True)
+    train_dataset = ImageDatasetRebalancing(dataset_train, transform=transform, oversample=True)
 
     # DataLoader to load the data in batches
     train_loader = DataLoader(
