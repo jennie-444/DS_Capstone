@@ -1,8 +1,0 @@
-{
-    "dropout": 0.5,
-    "learning_rate": 0.0001,
-    "epochs": 10,
-    "batch_size": 32,
-    "balanced": false,
-    "data_preprocessing": null
-}
