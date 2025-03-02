@@ -72,11 +72,18 @@ def run_cnn(
 # run grid search
 # Note: Change values below to be desired save path and search parameters
 SAVE_PATH = "model_results/cnn_v1/cnn_raw/raw_balanced"
-DROPOUT = [0.1, 0.3, 0.5]
-LR = [0.001, 0.0001]
-EPOCHS = [10, 50]
-BATCH_SIZE = [32]
-BALANCED = True
+# DROPOUT = [0.1, 0.3, 0.5]
+# LR = [0.001, 0.0001]
+# EPOCHS = [10, 50]
+# BATCH_SIZE = [32]
+# BALANCED = True
+
+# best hyperparameters
+DROPOUT = [0.5]
+LR = [0.0001]
+EPOCHS = [50]
+BATCH_SIZE = [32] 
+BALANCED = False
 
 # experiment #
 COUNT = 1
@@ -95,9 +102,7 @@ for i, j, k, n in params:
         "dropout": i,
         "learning_rate": j,
         "epochs": k,
-        "batch_size": n,
-        "balanced": False,
-        "data_preprocessing": None
+        "batch_size": n
     }
     with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
         json.dump(config, json_file, indent=4)

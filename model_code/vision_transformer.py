@@ -44,14 +44,22 @@ def run_transformer(
     # run evaluation
     evaluate_model(trained_model, test_loader, device, save_dir)
 
-# run grid search
+# run grid search 
+# uncomment below to run grid search
 # Note: Change values below to be desired save path and search parameters
 SAVE_PATH = "model_results/transformer_v1/transformer_raw/raw_balanced"
-DROPOUT = [0.1, 0.3, 0.5]
-LR = [0.001, 0.0001]
-EPOCHS = [10, 50]
+# DROPOUT = [0.1, 0.3, 0.5]
+# LR = [0.001, 0.0001]
+# EPOCHS = [10, 50]
+# BATCH_SIZE = [32]
+# BALANCED = True
+
+# best hyperparameters
+DROPOUT = [0.1]
+LR = [0.0001]
+EPOCHS = [50]
 BATCH_SIZE = [32]
-BALANCED = True
+BALANCED = False
 
 # experiment #
 COUNT = 1
@@ -70,9 +78,7 @@ for i, j, k, n in params:
         "dropout": i,
         "learning_rate": j,
         "epochs": k,
-        "batch_size": n,
-        "balanced": False,
-        "data_preprocessing": None
+        "batch_size": n
     }
     with open(os.path.join(SAVE_DIR, "config.json"), "w") as json_file:
         json.dump(config, json_file, indent=4)
