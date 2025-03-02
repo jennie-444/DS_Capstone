@@ -71,8 +71,8 @@ def run_cnn(
 
 # run grid search
 # Note: Change values below to be desired save path, search parameters, and preprocessing technique
-SAVE_PATH = "model_results/cnn_v1/cnn_z_score/z_score_imbalanced"
-PREPROCESS = 'z_score'
+SAVE_PATH = "model_results/cnn_v1/cnn_local_contrast/local_contrast_imbalanced"
+PREPROCESS = 'local_contrast'
 
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
