@@ -71,7 +71,7 @@ def run_cnn(
 
 # run grid search
 # Note: Change values below to be desired save path, search parameters, and preprocessing technique
-SAVE_PATH = "model_results/cnn_v1/cnn_raw/raw_balanced"
+SAVE_PATH = "model_results/cnn_v1/cnn_min_max/min_max_imbalanced"
 PREPROCESS = 'min_max'
 
 # DROPOUT = [0.1, 0.3, 0.5]
