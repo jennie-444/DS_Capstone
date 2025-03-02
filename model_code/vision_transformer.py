@@ -47,7 +47,7 @@ def run_transformer(
 # run grid search 
 # uncomment below to run grid search
 # Note: Change values below to be desired save path and search parameters
-SAVE_PATH = "model_results/transformer_v1/transformer_z_score/z_score_balanced"
+SAVE_PATH = "model_results/transformer_v1/transformer_z_score/z_score_imbalanced"
 PREPROCESS = 'z_score'
 
 # DROPOUT = [0.1, 0.3, 0.5]
@@ -61,7 +61,7 @@ DROPOUT = [0.1]
 LR = [0.0001]
 EPOCHS = [50]
 BATCH_SIZE = [32]
-BALANCED = True
+BALANCED = False
 
 # experiment #
 COUNT = 1
