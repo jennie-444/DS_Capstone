@@ -47,14 +47,14 @@ class MRI_CNN(nn.Module):
 
 # run training on CNN image classifier
 def run_cnn(
-    batch_size, save_dir, dropout, lr, epochs, balance
+    batch_size, save_dir, dropout, lr, epochs, balance, preprocess
 ):
     NUM_CLASSES = 4
 
     if balance:
-        train_loader, test_loader = rebalance_load_data(batch_size)
+        train_loader, test_loader = rebalance_load_data(batch_size, preprocess)
     else:
-        train_loader, test_loader = load_data(batch_size)
+        train_loader, test_loader = load_data(batch_size, preprocess)
     
     # instantiate the model
     model = MRI_CNN(num_classes=NUM_CLASSES, dropout=dropout)
@@ -98,7 +98,7 @@ for i, j, k, n in params:
     if not os.path.exists(SAVE_DIR):
         os.makedirs(SAVE_DIR)
     # train and eval, save results
-    run_cnn(n, SAVE_DIR, i, j, k, BALANCED)
+    run_cnn(n, SAVE_DIR, i, j, k, BALANCED, PREPROCESS)
     # save model configuration
     config = {
         "dropout": i,

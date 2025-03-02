@@ -9,7 +9,7 @@ from functions import train_model, load_data, evaluate_model, rebalance_load_dat
 
 # run training on vision transformer image classifier
 def run_transformer(
-    batch_size, save_dir, dropout, lr, epochs, balance
+    batch_size, save_dir, dropout, lr, epochs, balance, preprocess
 ):
     NUM_CLASSES = 4
     IMAGE_SIZE = 128
@@ -17,9 +17,9 @@ def run_transformer(
     PATCH_SIZE = 16
 
     if balance:
-        train_loader, test_loader = rebalance_load_data(batch_size)   
+        train_loader, test_loader = rebalance_load_data(batch_size, preprocess)   
     else:
-        train_loader, test_loader = load_data(batch_size)
+        train_loader, test_loader = load_data(batch_size, preprocess)
     
     # instantiate the model
     model = VisionTransformer(
@@ -48,6 +48,8 @@ def run_transformer(
 # uncomment below to run grid search
 # Note: Change values below to be desired save path and search parameters
 SAVE_PATH = "model_results/transformer_v1/transformer_raw/raw_balanced"
+PREPROCESS = 'min_max'
+
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
 # EPOCHS = [10, 50]
@@ -72,7 +74,7 @@ for i, j, k, n in params:
     if not os.path.exists(SAVE_DIR):
         os.makedirs(SAVE_DIR)
     # train and eval, save results
-    run_transformer(n, SAVE_DIR, i, j, k, BALANCED)
+    run_transformer(n, SAVE_DIR, i, j, k, BALANCED, PREPROCESS)
     # save model configuration
     config = {
         "dropout": i,
