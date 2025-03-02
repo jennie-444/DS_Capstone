@@ -4,7 +4,7 @@ import torch.optim as optim
 import os
 import json
 import itertools
-from functions import train_model, load_data, evaluate_model, rebalance_load_data
+from functions import train_model, load_data, evaluate_model, rebalance_load_data, preprocess_data
 
 # CNN code
 class MRI_CNN(nn.Module):
@@ -70,8 +70,10 @@ def run_cnn(
     evaluate_model(trained_model, test_loader, device, save_dir)
 
 # run grid search
-# Note: Change values below to be desired save path and search parameters
+# Note: Change values below to be desired save path, search parameters, and preprocessing technique
 SAVE_PATH = "model_results/cnn_v1/cnn_raw/raw_balanced"
+PREPROCESS = 'min_max'
+
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
 # EPOCHS = [10, 50]

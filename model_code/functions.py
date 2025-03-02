@@ -62,7 +62,7 @@ def dict_to_image(image_dict):
         raise TypeError(f"Expected dictionary with 'bytes' key, got {type(image_dict)}")
 
 # make data loaders
-def load_data(batch_size):
+def load_data(batch_size, preprocess):
     dataset_train = load_dataset('Falah/Alzheimer_MRI', split='train')
     dataset_train = dataset_train.to_pandas()
     dataset_train['img_arr'] = dataset_train['image'].apply(dict_to_image)
@@ -71,6 +71,10 @@ def load_data(batch_size):
     dataset_test = dataset_test.to_pandas()
     dataset_test['img_arr'] = dataset_test['image'].apply(dict_to_image)
     dataset_test.drop("image", axis=1, inplace=True)
+
+    # preprocess
+    dataset_train = preprocess_data(dataset_train, preprocess)
+    dataset_test = preprocess_data(dataset_test, preprocess)
 
     # data loader
     train_dataset = ImageDataset(dataset_train)
@@ -81,7 +85,7 @@ def load_data(batch_size):
     return train_loader, test_loader
 
 # load data and rebalance data
-def rebalance_load_data(batch_size):
+def rebalance_load_data(batch_size, preprocess):
     dataset_train = load_dataset('Falah/Alzheimer_MRI', split='train')
     dataset_train = dataset_train.to_pandas()
     dataset_train['img_arr'] = dataset_train['image'].apply(dict_to_image)
@@ -90,6 +94,10 @@ def rebalance_load_data(batch_size):
     dataset_test = dataset_test.to_pandas()
     dataset_test['img_arr'] = dataset_test['image'].apply(dict_to_image)
     dataset_test.drop("image", axis=1, inplace=True)
+
+    # preprocess
+    dataset_train = preprocess_data(dataset_train, preprocess)
+    dataset_test = preprocess_data(dataset_test, preprocess)
 
     test_dataset = ImageDataset(dataset_test)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=True)
@@ -398,3 +406,28 @@ def bilateral_filer_preprocess(dataframe):
         bilateral_images.append(scaled_image)
     bilateral_dataset['img_arr'] = bilateral_images
     return bilateral_dataset
+
+def preprocess_data(dataframe, preprocess):
+    if preprocess == None:
+        return dataframe
+
+    elif preprocess == 'min_max':
+        return min_max_preprocess(dataframe)
+
+    elif preprocess == 'z_score':
+        return z_score_preprocess(dataframe)
+    
+    elif preprocess == 'local_contrast':
+        return local_contrast_preprocess(dataframe)
+
+    elif preprocess == 'crop':
+        return crop_preprocess(dataframe)
+    
+    elif preprocess == 'gaussian_blur':
+        return gaussian_blur_preprocess(dataframe)
+    
+    elif preprocess == 'median_blur':
+        return median_blur_preprocess(dataframe)
+    
+    elif preprocess == 'bilateral_filter':
+        return bilateral_filer_preprocess(dataframe)
