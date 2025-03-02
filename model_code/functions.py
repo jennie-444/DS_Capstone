@@ -11,6 +11,7 @@ from sklearn.preprocessing import label_binarize
 import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix, precision_score, f1_score, accuracy_score, roc_auc_score, roc_curve
 from PIL import Image
+import scipy.ndimage
 
 # dataset class
 class ImageDataset(Dataset):
@@ -266,3 +267,134 @@ def evaluate_model(model, test_loader, device, save_dir):
     plt.tight_layout()
     plt.savefig(os.path.join(save_dir, "confusion_matrix.png"))
     plt.close()
+
+
+# preprocessing functions
+
+# min/max scaling
+def min_max_scale(image_array, new_min=0, new_max=1):
+    old_min = np.min(image_array)
+    old_max = np.max(image_array)
+    if old_min == old_max:
+        return np.full(image_array.shape, new_min)
+    scaled_array = (image_array - old_min) / (old_max - old_min) * (new_max - new_min) + new_min
+    return scaled_array
+
+def min_max_preprocess(dataframe):
+    min_max_dataset = pd.DataFrame()
+    min_max_dataset['label'] = dataframe['label']
+    min_max_images = []
+    for i in dataframe['img_arr']:
+        scaled_image = min_max_scale(i, 0, 1)
+        min_max_images.append(scaled_image)
+    min_max_dataset['img_arr'] = min_max_images
+    return min_max_dataset
+
+# z score standardization
+def z_score_standardize(image_array):
+    mean = np.mean(image_array)
+    std = np.std(image_array)
+    if std == 0:
+        return np.zeros_like(image_array)
+    standardized_array = (image_array - mean) / std
+    return standardized_array
+
+def z_score_preprocess(dataframe):
+    z_score_dataset = pd.DataFrame()
+    z_score_dataset['label'] = dataframe['label']
+    z_score_images = []
+    for i in dataframe['img_arr']:
+        scaled_image = z_score_standardize(i)
+        z_score_images.append(scaled_image)
+    z_score_dataset['img_arr'] = z_score_images
+    return z_score_dataset
+
+# local contrast normalization
+# kernel_size (int): Size of the local neighborhood window.
+# epsilon (float): Small constant to prevent division by zero.
+def local_contrast_normalization(image_array, kernel_size=3, epsilon=1e-8):
+    image_array = image_array.astype(np.float32)
+    # Compute local mean using a uniform filter
+    local_mean = scipy.ndimage.uniform_filter(image_array, size=kernel_size, mode='reflect')
+    # Compute local variance using a squared filter
+    local_sqr_mean = scipy.ndimage.uniform_filter(image_array ** 2, size=kernel_size, mode='reflect')
+    local_std = np.sqrt(local_sqr_mean - local_mean ** 2 + epsilon)
+    # Normalize the image
+    normalized_image = (image_array - local_mean) / local_std
+    return normalized_image
+
+def local_contrast_preprocess(dataframe):
+    local_contrast_dataset = pd.DataFrame()
+    local_contrast_dataset['label'] = dataframe['label']
+    local_contrast_images = []
+    for i in dataframe['img_arr']:
+        scaled_image = local_contrast_normalization(i)
+        local_contrast_images.append(scaled_image)
+    local_contrast_dataset['img_arr'] = local_contrast_images
+    return local_contrast_dataset
+
+def crop_brain_region(image):
+    
+    # Threshold the image to separate the brain from the background
+    _, thresh = cv2.threshold(image, 10, 255, cv2.THRESH_BINARY_INV)
+    
+    # Find contours of the non-zero regions (brain region)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    
+    if not contours:
+        print("failed")
+        return image
+
+    # Get the bounding box around the largest contour
+    x, y, w, h = cv2.boundingRect(contours[0])
+    
+    # Optionally draw a rectangle around the brain (for debugging purposes)
+    cv2.rectangle(image, (x, y), (x + w, y + h), (255, 0, 0), 2)
+
+    # Crop the brain region to eliminate black background
+    cropped = image[y:y+h, x:x+w]
+    
+    return cropped
+
+def crop_preprocess(dataframe):
+    cropped_dataset = pd.DataFrame()
+    cropped_dataset['label'] = dataframe['label']
+    cropped_images = []
+    for i in dataframe['img_arr']:
+        scaled_image = crop_brain_region(i)
+        cropped_images.append(scaled_image)
+    cropped_dataset['img_arr'] = cropped_images
+    return cropped_dataset
+
+# gaussian blur
+def gaussian_blur_preprocess(dataframe):
+    gaussian_dataset = pd.DataFrame()
+    gaussian_dataset['label'] = dataframe['label']
+    gaussian_images = []
+    for i in dataframe['img_arr']:
+        scaled_image = cv2.GaussianBlur(i, (5, 5), 0)
+        gaussian_images.append(scaled_image)
+    gaussian_dataset['img_arr'] = gaussian_images
+    return gaussian_dataset
+
+# median blur
+def median_blur_preprocess(dataframe):
+    median_dataset = pd.DataFrame()
+    median_dataset['label'] = dataframe['label']
+    median_images = []
+    for i in dataframe['img_arr']:
+        scaled_image = cv2.medianBlur(i, 5)
+        median_images.append(scaled_image)
+    median_dataset['img_arr'] = median_images
+    return median_dataset
+
+# bilateral filter
+def bilateral_filer_preprocess(dataframe):
+    bilateral_dataset = pd.DataFrame()
+    bilateral_dataset['label'] = dataframe['label']
+    bilateral_images = []
+    for i in dataframe['img_arr']:
+        scaled_image = cv2.bilateralFilter(i, 9, 75, 75)
+        bilateral_images.append(scaled_image)
+    bilateral_dataset['img_arr'] = bilateral_images
+    return bilateral_dataset
