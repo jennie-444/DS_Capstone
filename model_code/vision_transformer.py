@@ -47,8 +47,8 @@ def run_transformer(
 # run grid search 
 # uncomment below to run grid search
 # Note: Change values below to be desired save path and search parameters
-SAVE_PATH = "model_results/transformer_v1/transformer_local_contrast/local_contrast_imbalanced"
-PREPROCESS = 'local_contrast'
+SAVE_PATH = "model_results/transformer_v1/transformer_gaussian_blur/gaussian_blur_balanced"
+PREPROCESS = 'gaussian_blur'
 
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
@@ -61,7 +61,7 @@ DROPOUT = [0.1]
 LR = [0.0001]
 EPOCHS = [50]
 BATCH_SIZE = [32]
-BALANCED = False
+BALANCED = True
 
 # experiment #
 COUNT = 1
