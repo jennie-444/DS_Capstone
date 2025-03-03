@@ -1,0 +1,2 @@
+Accuracy,Precision,F1-Score,Avg TPR (Sensitivity),Avg FPR,Avg TNR (Specificity),Avg FNR,AUC
+0.4953125,0.123828125,0.16562173458725182,0.25,0.25,0.75,0.75,0.5358787104527913
