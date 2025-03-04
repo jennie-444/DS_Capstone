@@ -71,8 +71,8 @@ def run_cnn(
 
 # run grid search
 # Note: Change values below to be desired save path, search parameters, and preprocessing technique
-SAVE_PATH = "model_results/cnn_v1/cnn_bilateral_filter/bilateral_filter_imbalanced"
-PREPROCESS = 'bilateral_filter'
+SAVE_PATH = "model_results/cnn_v1/cnn_crop/crop_imbalanced"
+PREPROCESS = 'crop'
 
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
