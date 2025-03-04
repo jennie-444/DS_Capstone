@@ -47,8 +47,8 @@ def run_transformer(
 # run grid search 
 # uncomment below to run grid search
 # Note: Change values below to be desired save path and search parameters
-SAVE_PATH = "model_results/transformer_v1/transformer_bilateral_filter/bilateral_filter_imbalanced"
-PREPROCESS = 'bilateral_filter'
+SAVE_PATH = "model_results/transformer_v1/transformer_crop/crop_imbalanced"
+PREPROCESS = 'crop'
 
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
