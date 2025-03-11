@@ -20,7 +20,6 @@ class MRI_CNN(nn.Module):
         # 4 convolutional layers
         self.conv1 = nn.Conv2d(1, 32, kernel_size=3, stride=1, padding=1) 
         self.bn1 = nn.BatchNorm2d(32)
-        self.relu = nn.ReLU()
         
         self.conv2 = nn.Conv2d(32, 64, kernel_size=3, stride=1, padding=1)
         self.bn2 = nn.BatchNorm2d(64)
@@ -31,9 +30,12 @@ class MRI_CNN(nn.Module):
         self.conv4 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
         self.bn4 = nn.BatchNorm2d(256)
         
+        # Max pool
+        self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
         
         # Global Average Pooling
         self.global_avg_pool = nn.AdaptiveAvgPool2d(1)
+        
         # Fully connected layer
         self.fc = nn.Linear(256, num_classes)
         
