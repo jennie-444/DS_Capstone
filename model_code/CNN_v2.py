@@ -29,6 +29,9 @@ class MRI_CNN(nn.Module):
 
         self.conv4 = nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1)
         self.bn4 = nn.BatchNorm2d(256)
+
+        # Define ReLU activation function
+        self.relu = nn.ReLU()
         
         # Max pool
         self.pool = nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
