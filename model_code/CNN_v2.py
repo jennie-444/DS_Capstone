@@ -93,8 +93,8 @@ def run_cnn(
 
 # run grid search
 # Note: Change values below to be desired save path, search parameters, and preprocessing technique
-SAVE_PATH = "model_results/cnn_v2/cnn_crop/crop_balanced"
-PREPROCESS = "crop"
+SAVE_PATH = "model_results/cnn_v2/cnn_gaussian_blur/gaussian_blur_balanced"
+PREPROCESS = "gaussian_blur"
 
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
