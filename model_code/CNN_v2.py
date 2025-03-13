@@ -93,8 +93,8 @@ def run_cnn(
 
 # run grid search
 # Note: Change values below to be desired save path, search parameters, and preprocessing technique
-SAVE_PATH = "model_results/cnn_v2/cnn_gaussian_blur/gaussian_blur_balanced"
-PREPROCESS = "gaussian_blur"
+SAVE_PATH = "model_results/cnn_v2/cnn_median_blur/median_blur_imbalanced"
+PREPROCESS = "median_blur"
 
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
@@ -107,7 +107,7 @@ DROPOUT = [0.5]
 LR = [0.0001]
 EPOCHS = [50]
 BATCH_SIZE = [32] 
-BALANCED = True
+BALANCED = False
 
 # experiment #
 COUNT = 1
