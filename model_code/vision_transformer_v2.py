@@ -47,8 +47,8 @@ def run_transformer(
 # run grid search 
 # uncomment below to run grid search
 # Note: Change values below to be desired save path and search parameters
-SAVE_PATH = "model_results/transformer_v2/transformer_min_max/min_max_balanced"
-PREPROCESS = 'min_max'
+SAVE_PATH = "model_results/transformer_v2/transformer_raw/raw_balanced"
+PREPROCESS = None
 
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
