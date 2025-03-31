@@ -80,27 +80,33 @@ def run_cnn(
     # call evaluate model from functions.py to evaluate the given model and save results
     evaluate_model(trained_model, test_loader, device, save_dir)
 
-# set training parameters
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+# SET TRAINING PARAMETERS: MAKE MODIFICATIONS HERE
 
-# Note: Change values below to be desired save path, search parameters, and preprocessing technique
+# Note: Change value below to be desired save path
 SAVE_PATH = "model_results/cnn_v1/cnn_crop/crop_balanced"
+
+# Note: Change value below to be desired preprocessing technique
+# preprocess options include: 'min_max', 'z_score', 'local_contrast', 'crop', 'gaussian_blur', 'median_blur', 'bilateral_filter'
 PREPROCESS = 'crop'
 
-# uncomment below to run grid search
+# Note: uncomment below to run grid search
+# change params as desired
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
 # EPOCHS = [10, 50]
 # BATCH_SIZE = [32]
 # BALANCED = True
 
-# comment the values below if running grid search
-# change these values as desired to train 1 model
+# Note: comment the values below if running grid search
+# change params as desired to train 1 model
 # best hyperparameters (as determined via preliminary hyperparameter tuning process)
 DROPOUT = [0.5]
 LR = [0.0001]
 EPOCHS = [50]
 BATCH_SIZE = [32] 
 BALANCED = True
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
 # experiment # to track save folders
 COUNT = 1

@@ -58,9 +58,9 @@ Our models utilize many shared functions to load data, preprocess data, train mo
 2. Navigate to the project directory
 3. Set up a virtual environment (optional)
 4. Install the required dependencies from the requirements.txt file `pip install -r requirements.txt`
-5. Optional: before running any model code file
-    - If running grid search: uncomment the grid search lines and comment out the single model training hyperparameters (clearer instructions in code file). Change grid search parameters as desired.
-    - If training single mode: leave grid search lines commented and change single model training hyperparameters as desired. 
-6. In model code files, change the save directory to be one you'd like to save your results to (clearer instructions and line in code file). 
+5. Before running any model code file, change the save directory to be one you'd like to save your results to (line to change labeled in files). 
+6. Optional: before running any model code file follow instructions in file between the dashed lines to do the following
+    - Run grid search with desired parameters
+    - Train a single modle with desired parameters
 7. Run the CNN model training and evaluation using `python model_code/CNN_v1.py` or `python model_code/CNN/_v2.py`.
 8. Run the transformer model training and evaluation using `python model_code/vision_transformer_v1.py` or `python model_code/vision_transformer_v2.py`
