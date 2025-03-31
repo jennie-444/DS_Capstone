@@ -11,11 +11,13 @@ from functions import train_model, load_data, evaluate_model, rebalance_load_dat
 def run_transformer(
     batch_size, save_dir, dropout, lr, epochs, balance, preprocess
 ):
+    # defined params
     NUM_CLASSES = 4
     IMAGE_SIZE = 128
     NUM_CLASSES = 4
     PATCH_SIZE = 16
 
+    # balance if needed
     if balance:
         train_loader, test_loader = rebalance_load_data(batch_size, preprocess)   
     else:
@@ -33,6 +35,7 @@ def run_transformer(
         drop_rate = dropout,   
         num_classes=NUM_CLASSES
     )
+    # cross entropy loss and adam optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=1e-4)
 
@@ -44,19 +47,22 @@ def run_transformer(
     # run evaluation
     evaluate_model(trained_model, test_loader, device, save_dir)
 
-# run grid search 
-# uncomment below to run grid search
+# set training parameters
+
 # Note: Change values below to be desired save path and search parameters
 SAVE_PATH = "model_results/transformer_v1/transformer_crop/crop_balanced"
 PREPROCESS = 'crop'
 
+# uncomment below to run grid search
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
 # EPOCHS = [10, 50]
 # BATCH_SIZE = [32]
 # BALANCED = True
 
-# best hyperparameters
+# comment the values below if running grid search
+# change these values as desired to train 1 model
+# best hyperparameters (as determined via preliminary hyperparameter tuning process)
 DROPOUT = [0.1]
 LR = [0.0001]
 EPOCHS = [50]
@@ -66,8 +72,10 @@ BALANCED = True
 # experiment #
 COUNT = 1
 
+# initialize iterator 
 params = itertools.product(DROPOUT, LR, EPOCHS, BATCH_SIZE)
 
+# iterator through all params and train models
 for i, j, k, n in params:
     # make save directory if it does not exist
     SAVE_DIR = os.path.join(SAVE_PATH, str(COUNT))

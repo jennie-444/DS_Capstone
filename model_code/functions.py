@@ -14,6 +14,7 @@ from PIL import Image
 import scipy.ndimage
 
 # dataset class
+# custom ImageDataset Class for loading image array from dataframe
 class ImageDataset(Dataset):
     def __init__(self, dataframe):
         self.dataframe = dataframe
@@ -22,14 +23,16 @@ class ImageDataset(Dataset):
         return len(self.dataframe)
     
     def __getitem__(self, idx):
+        # get values from df cols
         image = self.dataframe.iloc[idx]["img_arr"]
         label = self.dataframe.iloc[idx]["label"]
         image = torch.tensor(image, dtype=torch.float32).unsqueeze(0)
         label = torch.tensor(label, dtype=torch.long)
         return image, label
 
-# dataset class with transformations for rebalancing, data augmentation
+# Custom ImageDataset Class that adds for rebalancing, data augmentation
 class ImageDatasetRebalacing(Dataset):
+    # accounts from transform when initalized
     def __init__(self, dataframe, transform):
         self.dataframe = dataframe
         self.transform = transform
@@ -38,6 +41,7 @@ class ImageDatasetRebalacing(Dataset):
         return len(self.dataframe)
     
     def __getitem__(self, idx):
+        # load values from df cols
         image = self.dataframe.iloc[idx]["img_arr"]
         label = self.dataframe.iloc[idx]["label"]
 
@@ -62,7 +66,10 @@ def dict_to_image(image_dict):
         raise TypeError(f"Expected dictionary with 'bytes' key, got {type(image_dict)}")
 
 # make data loaders
+# takes in batch size and string of preprocessing technique from select options seen in
+# preprocess_data function
 def load_data(batch_size, preprocess):
+    # load data from hugging face, train and test
     dataset_train = load_dataset('Falah/Alzheimer_MRI', split='train')
     dataset_train = dataset_train.to_pandas()
     dataset_train['img_arr'] = dataset_train['image'].apply(dict_to_image)
@@ -72,7 +79,7 @@ def load_data(batch_size, preprocess):
     dataset_test['img_arr'] = dataset_test['image'].apply(dict_to_image)
     dataset_test.drop("image", axis=1, inplace=True)
 
-    # preprocess
+    # preprocess based on given preprocessing technique
     dataset_train = preprocess_data(dataset_train, preprocess)
     dataset_test = preprocess_data(dataset_test, preprocess)
 
@@ -85,6 +92,9 @@ def load_data(batch_size, preprocess):
     return train_loader, test_loader
 
 # load data and rebalance data
+# make data loaders
+# takes in batch size and string of preprocessing technique from select options seen in
+# preprocess_data function
 def rebalance_load_data(batch_size, preprocess):
     dataset_train = load_dataset('Falah/Alzheimer_MRI', split='train')
     dataset_train = dataset_train.to_pandas()
@@ -149,6 +159,7 @@ def train_model(
         epochs: training epoch count
     Returns: trained model
     """
+    # iterate through epochs
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
@@ -279,7 +290,7 @@ def evaluate_model(model, test_loader, device, save_dir):
 
 # preprocessing functions
 
-# min/max scaling
+# min/max scaling given image array and min/max boundaries
 def min_max_scale(image_array, new_min=0, new_max=1):
     old_min = np.min(image_array)
     old_max = np.max(image_array)
@@ -288,6 +299,7 @@ def min_max_scale(image_array, new_min=0, new_max=1):
     scaled_array = (image_array - old_min) / (old_max - old_min) * (new_max - new_min) + new_min
     return scaled_array
 
+# preprocess df with min max scaling
 def min_max_preprocess(dataframe):
     min_max_dataset = pd.DataFrame()
     min_max_dataset['label'] = dataframe['label']
@@ -298,7 +310,7 @@ def min_max_preprocess(dataframe):
     min_max_dataset['img_arr'] = min_max_images
     return min_max_dataset
 
-# z score standardization
+# z score standardization given image array
 def z_score_standardize(image_array):
     mean = np.mean(image_array)
     std = np.std(image_array)
@@ -307,6 +319,7 @@ def z_score_standardize(image_array):
     standardized_array = (image_array - mean) / std
     return standardized_array
 
+# preprocess df with z score standardization
 def z_score_preprocess(dataframe):
     z_score_dataset = pd.DataFrame()
     z_score_dataset['label'] = dataframe['label']
@@ -317,7 +330,7 @@ def z_score_preprocess(dataframe):
     z_score_dataset['img_arr'] = z_score_images
     return z_score_dataset
 
-# local contrast normalization
+# local contrast normalization given image array
 # kernel_size (int): Size of the local neighborhood window.
 # epsilon (float): Small constant to prevent division by zero.
 def local_contrast_normalization(image_array, kernel_size=3, epsilon=1e-8):
@@ -331,6 +344,7 @@ def local_contrast_normalization(image_array, kernel_size=3, epsilon=1e-8):
     normalized_image = (image_array - local_mean) / local_std
     return normalized_image
 
+# preprocess df with local contrast
 def local_contrast_preprocess(dataframe):
     local_contrast_dataset = pd.DataFrame()
     local_contrast_dataset['label'] = dataframe['label']
@@ -341,6 +355,7 @@ def local_contrast_preprocess(dataframe):
     local_contrast_dataset['img_arr'] = local_contrast_images
     return local_contrast_dataset
 
+# crop given image
 def crop_brain_region(image):
     
     # Threshold the image to separate the brain from the background
@@ -364,6 +379,7 @@ def crop_brain_region(image):
     
     return cropped
 
+# crop images in given df
 def crop_preprocess(dataframe):
     cropped_dataset = pd.DataFrame()
     cropped_dataset['label'] = dataframe['label']
@@ -374,7 +390,7 @@ def crop_preprocess(dataframe):
     cropped_dataset['img_arr'] = cropped_images
     return cropped_dataset
 
-# gaussian blur
+# gaussian blur apply to df with image arrays
 def gaussian_blur_preprocess(dataframe):
     gaussian_dataset = pd.DataFrame()
     gaussian_dataset['label'] = dataframe['label']
@@ -385,7 +401,7 @@ def gaussian_blur_preprocess(dataframe):
     gaussian_dataset['img_arr'] = gaussian_images
     return gaussian_dataset
 
-# median blur
+# median blur apply to df with image arrays
 def median_blur_preprocess(dataframe):
     median_dataset = pd.DataFrame()
     median_dataset['label'] = dataframe['label']
@@ -396,7 +412,7 @@ def median_blur_preprocess(dataframe):
     median_dataset['img_arr'] = median_images
     return median_dataset
 
-# bilateral filter
+# bilateral filter apply to df with image arrays
 def bilateral_filer_preprocess(dataframe):
     bilateral_dataset = pd.DataFrame()
     bilateral_dataset['label'] = dataframe['label']
@@ -407,6 +423,8 @@ def bilateral_filer_preprocess(dataframe):
     bilateral_dataset['img_arr'] = bilateral_images
     return bilateral_dataset
 
+# call relevant preprocessing function given df to preprocess and string of 
+# preprocessing name
 def preprocess_data(dataframe, preprocess):
     if preprocess == None:
         return dataframe

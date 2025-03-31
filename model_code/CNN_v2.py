@@ -12,7 +12,7 @@ class MRI_CNN(nn.Module):
         Choices in this version
         1. Four convolutional layers helps learn more features from the images, but risks overfitting
         2. Global average pooling pools across entire feature maps to one value but not locally, which although losing spatial information, may work sufficiently for classification and avoid overfitting
-        3.  Batch normalization helps standardize outputs of batches by normalizing, helps network run faster
+        3. Batch normalization helps standardize outputs of batches by normalizing, helps network run faster
     '''
     def __init__(self, num_classes, dropout = 0.5):
         super(MRI_CNN, self).__init__()
@@ -44,7 +44,8 @@ class MRI_CNN(nn.Module):
         
         # Dropout helps avoid overfitting
         self.dropout = nn.Dropout(dropout)
-        
+    
+    # forward pass
     def forward(self, x):
         x = self.relu(self.bn1(self.conv1(x)))
         x = self.pool(x)
@@ -73,6 +74,7 @@ def run_cnn(
 ):
     NUM_CLASSES = 4
 
+    # if revbalacing needed, use rebalance function
     if balance:
         train_loader, test_loader = rebalance_load_data(batch_size, preprocess)
     else:
@@ -80,6 +82,7 @@ def run_cnn(
     
     # instantiate the model
     model = MRI_CNN(num_classes=NUM_CLASSES, dropout=dropout)
+    # cross entropy loss and adam optimizer
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=lr)
 
@@ -91,18 +94,22 @@ def run_cnn(
     # run evaluation
     evaluate_model(trained_model, test_loader, device, save_dir)
 
-# run grid search
+# set training parameters
+
 # Note: Change values below to be desired save path, search parameters, and preprocessing technique
 SAVE_PATH = "model_results/cnn_v2/cnn_z_score/z_score_balanced"
 PREPROCESS = "z_score"
 
+# uncomment below to run grid search
 # DROPOUT = [0.1, 0.3, 0.5]
 # LR = [0.001, 0.0001]
 # EPOCHS = [10, 50]
 # BATCH_SIZE = [32]
 # BALANCED = True
 
-# best hyperparameters
+# comment the values below if running grid search
+# change these values as desired to train 1 model
+# best hyperparameters (as determined via preliminary hyperparameter tuning process)
 DROPOUT = [0.5]
 LR = [0.0001]
 EPOCHS = [50]
@@ -112,6 +119,7 @@ BALANCED = True
 # experiment #
 COUNT = 1
 
+# set iterator
 params = itertools.product(DROPOUT, LR, EPOCHS, BATCH_SIZE)
 
 for i, j, k, n in params:
