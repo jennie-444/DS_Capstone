@@ -1,0 +1,14 @@
+{
+  "name": "bbe8a7fff48ea2ba",
+  "main": "bbe8a7fff48ea2ba@330.js",
+  "version": "330.0.0",
+  "homepage": "https://observablehq.com/d/bbe8a7fff48ea2ba",
+  "author": {
+    "name": "Nadia424",
+    "url": "https://observablehq.com/@nadia424"
+  },
+  "type": "module",
+  "peerDependencies": {
+    "@observablehq/runtime": "4 - 5"
+  }
+}
