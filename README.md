@@ -62,8 +62,8 @@ We created a few visualizations to summarize our model performance. These visual
 2. Navigate to the project directory
 3. Set up a virtual environment (optional)
 4. Install the required dependencies from the requirements.txt file `pip install -r requirements.txt`
-5. Before running any model code file, change the save directory to be one you'd like to save your results to (line to change labeled in files). 
-6. Optional: before running any model code file follow instructions in file between the dashed lines to do the following
+5. Before running any code in the `model_code` folder, change the save directory to be one you'd like to save your results to (line to change labeled in files). 
+6. Optional: before running any code in the `model_code` folder, follow instructions in file between the dashed lines to do the following
     - Run grid search with desired parameters
     - Train a single modle with desired parameters
 7. Run the CNN model training and evaluation using `python model_code/CNN_v1.py` or `python model_code/CNN/_v2.py`.
