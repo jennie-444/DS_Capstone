@@ -29,6 +29,9 @@ Our dataset contains imbalanced classes. Our class counts in the training data a
 #### Shared Model Code
 Our models utilize many shared functions to load data, preprocess data, train models, and evaluate models. These can be found in `model_code/functions.py`. 
 
+#### Analysis Visualizations
+We created a few visualizations to summarize our model performance. These visuals were built using observable and can be viewed in the following link. https://observablehq.com/d/bbe8a7fff48ea2ba
+
 #### Repo Structure
 - `data_code`: code related to preprocessing and data exploration
     - `data_load_explore.ipynb`: exploration
@@ -43,6 +46,7 @@ Our models utilize many shared functions to load data, preprocess data, train mo
 - `model_results`: stores model results. Contains test results for each preprocessing technique with balanced and not balanced data. 
     - `cnn_v1`: Contains 1 folder with grid search results. 
     - `cnn_v2`
+    - `data_visualizations`: analysis visualizations
     - `transformer_v1`: Contains 1 folder with grid search results. 
     - `transformer_v2`
 - `.gitignore`: files to not check into git including model ptbundle files and ipynb checkpoints
